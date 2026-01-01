@@ -17,12 +17,8 @@ export default function TerminalBackground() {
 
     const chars = 'ﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗｾﾈｽﾀﾇﾍ01';
     const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops: number[] = [];
-
-    for (let i = 0; i < columns; i++) {
-      drops[i] = Math.random() * -100;
-    }
+    const columns = Math.floor(canvas.width / fontSize);
+    const drops: number[] = Array(columns).fill(1).map(() => Math.random() * -100);
 
     function draw() {
       if (!ctx || !canvas) return;
@@ -30,15 +26,13 @@ export default function TerminalBackground() {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      ctx.fillStyle = '#10b981';
       ctx.font = `${fontSize}px monospace`;
-
       for (let i = 0; i < drops.length; i++) {
         const text = chars[Math.floor(Math.random() * chars.length)];
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        ctx.fillStyle = `rgba(16, 185, 129, ${Math.random() * 0.5 + 0.5})`;
+        ctx.fillStyle = `rgba(16, 185, 129, ${Math.random() * 0.15 + 0.05})`;
         ctx.fillText(text, x, y);
 
         if (y > canvas.height && Math.random() > 0.975) {
@@ -68,7 +62,7 @@ export default function TerminalBackground() {
       <div className="absolute inset-0 bg-black" />
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 opacity-20"
+        className="absolute inset-0 opacity-15"
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black" />
     </div>

@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { getGitHubRepos, GitHubRepo } from '@/lib/github';
-import { FaStar, FaCodeBranch, FaExternalLinkAlt } from 'react-icons/fa';
+import { FaStar, FaCodeBranch, FaExternalLinkAlt, FaCode } from 'react-icons/fa';
 
 export default function ProjectsGrid() {
   const [repos, setRepos] = useState<GitHubRepo[]>([]);
@@ -32,23 +33,33 @@ export default function ProjectsGrid() {
         {loading ? (
           <div className="text-emerald-400 animate-pulse">Fetching repositories...</div>
         ) : topRepos.length === 0 ? (
-          <div className="text-zinc-500">No public repositories found</div>
+          <div className="border-2 border-red-500/30 rounded-lg bg-black/80 backdrop-blur-sm p-8">
+            <div className="text-center">
+              <div className="text-red-500 text-4xl mb-4">⚠️</div>
+              <h3 className="text-xl text-red-400 mb-2">Unable to Load Repositories</h3>
+              <p className="text-zinc-400 mb-4">
+                GitHub API rate limit may have been exceeded or repositories are unavailable.
+              </p>
+              <a
+                href="https://github.com/TrendySloth1001?tab=repositories"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border-2 border-emerald-500/30 rounded hover:bg-emerald-500/20 hover:border-emerald-500/50 transition text-emerald-400"
+              >
+                <FaExternalLinkAlt />
+                View on GitHub
+              </a>
+            </div>
+          </div>
         ) : (
           <>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {topRepos.map((repo) => (
-                <a
-                  key={repo.id}
-                  href={repo.html_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block group"
-                >
+                <div key={repo.id} className="block group">
                   <div className="border-2 border-emerald-500/30 rounded-lg bg-black/50 backdrop-blur-sm p-6 hover:border-emerald-500/60 hover:bg-emerald-500/5 transition h-full">
                     <div className="flex items-start justify-between mb-4">
                       <h3 className="text-lg font-semibold text-emerald-400 group-hover:text-emerald-300 transition flex items-center gap-2">
                         {repo.name}
-                        <FaExternalLinkAlt className="text-xs opacity-0 group-hover:opacity-100 transition" />
                       </h3>
                     </div>
 
@@ -69,7 +80,7 @@ export default function ProjectsGrid() {
                       </div>
                     )}
 
-                    <div className="flex items-center gap-4 text-sm text-zinc-500">
+                    <div className="flex items-center gap-4 text-sm text-zinc-500 mb-4">
                       {repo.language && (
                         <span className="text-emerald-400">{repo.language}</span>
                       )}
@@ -82,8 +93,28 @@ export default function ProjectsGrid() {
                         <span>{repo.forks_count}</span>
                       </div>
                     </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-4 pt-4 border-t border-emerald-500/20">
+                      <Link
+                        href={`/project/${repo.full_name}`}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded text-sm text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition"
+                      >
+                        <FaCode />
+                        Browse Code
+                      </Link>
+                      <a
+                        href={repo.html_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 px-3 py-2 bg-zinc-800/50 border border-zinc-700 rounded text-sm text-zinc-400 hover:bg-zinc-800 hover:border-zinc-600 transition"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <FaExternalLinkAlt />
+                      </a>
+                    </div>
                   </div>
-                </a>
+                </div>
               ))}
             </div>
 

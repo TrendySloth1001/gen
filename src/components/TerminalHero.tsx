@@ -33,7 +33,7 @@ export default function TerminalHero() {
   }, []);
 
   return (
-    <section className="min-h-screen flex items-center justify-center px-6 py-20 font-mono">
+    <section className="min-h-screen flex items-center justify-center px-6 py-20 pt-24 font-mono">
       <div className="max-w-4xl w-full space-y-8">
         {/* Terminal Window */}
         <div className="border-2 border-emerald-500/30 rounded-lg bg-black/80 backdrop-blur-sm shadow-2xl shadow-emerald-500/10">
@@ -114,7 +114,7 @@ export default function TerminalHero() {
                     <span>github</span>
                   </a>
                   <a
-                    href="https://linkedin.com/in/nikhil-kumawat"
+                    href="https://www.linkedin.com/in/nikhil-kumawat-78703b32b/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-blue-500/30 text-blue-400 rounded hover:bg-zinc-800 hover:border-blue-500/50 transition"
@@ -123,7 +123,7 @@ export default function TerminalHero() {
                     <span>linkedin</span>
                   </a>
                   <a
-                    href="mailto:your.email@example.com"
+                    href="mailto:nkumawat8956@gmail.com"
                     className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-600/30 text-zinc-400 rounded hover:bg-zinc-800 hover:border-zinc-500/50 transition"
                   >
                     <FaEnvelope className="text-lg" />

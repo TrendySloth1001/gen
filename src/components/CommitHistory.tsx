@@ -66,23 +66,82 @@ export default function CommitHistory() {
 
   function getEventDescription(event: GitHubEvent) {
     const repoName = event.repo.name;
+    const [owner, repo] = repoName.split('/');
     
     switch (event.type) {
       case 'PushEvent':
-        const commits = event.payload.commits?.length || 0;
-        return `Pushed ${commits} commit${commits !== 1 ? 's' : ''} to ${repoName}`;
+        const branch = event.payload.ref?.replace('refs/heads/', '') || 'main';
+        const commits = event.payload.commits || [];
+        const commitCount = commits.length;
+        const firstCommit = commits[0]?.message?.split('\n')[0] || '';
+        return {
+          main: `Pushed ${commitCount} commit${commitCount !== 1 ? 's' : ''} to`,
+          branch: branch,
+          repo: repo,
+          detail: firstCommit ? `"${firstCommit.substring(0, 60)}${firstCommit.length > 60 ? '...' : ''}"` : null
+        };
       case 'CreateEvent':
-        return `Created ${event.payload.ref_type} in ${repoName}`;
+        const refType = event.payload.ref_type;
+        const refName = event.payload.ref || '';
+        return {
+          main: `Created ${refType}`,
+          branch: refName || refType,
+          repo: repo,
+          detail: refType === 'repository' ? 'New repository' : null
+        };
       case 'WatchEvent':
-        return `Starred ${repoName}`;
+        return {
+          main: 'Starred',
+          branch: null,
+          repo: repo,
+          detail: event.payload.action === 'started' ? '⭐' : null
+        };
       case 'ForkEvent':
-        return `Forked ${repoName}`;
+        return {
+          main: 'Forked',
+          branch: null,
+          repo: repo,
+          detail: `to ${event.payload.forkee?.full_name || 'repository'}`
+        };
       case 'PullRequestEvent':
-        return `${event.payload.action} pull request in ${repoName}`;
+        const prTitle = event.payload.pull_request?.title || '';
+        const prNumber = event.payload.pull_request?.number || '';
+        return {
+          main: `${event.payload.action?.charAt(0).toUpperCase() + event.payload.action?.slice(1) || 'Updated'} pull request`,
+          branch: `#${prNumber}`,
+          repo: repo,
+          detail: prTitle ? `"${prTitle.substring(0, 60)}${prTitle.length > 60 ? '...' : ''}"` : null
+        };
       case 'IssuesEvent':
-        return `${event.payload.action} issue in ${repoName}`;
+        const issueTitle = event.payload.issue?.title || '';
+        const issueNumber = event.payload.issue?.number || '';
+        return {
+          main: `${event.payload.action?.charAt(0).toUpperCase() + event.payload.action?.slice(1) || 'Updated'} issue`,
+          branch: `#${issueNumber}`,
+          repo: repo,
+          detail: issueTitle ? `"${issueTitle.substring(0, 60)}${issueTitle.length > 60 ? '...' : ''}"` : null
+        };
+      case 'PullRequestReviewEvent':
+        return {
+          main: 'Reviewed pull request',
+          branch: `#${event.payload.pull_request?.number || ''}`,
+          repo: repo,
+          detail: event.payload.review?.state || null
+        };
+      case 'IssueCommentEvent':
+        return {
+          main: 'Commented on issue',
+          branch: `#${event.payload.issue?.number || ''}`,
+          repo: repo,
+          detail: event.payload.comment?.body?.substring(0, 50) || null
+        };
       default:
-        return `Activity in ${repoName}`;
+        return {
+          main: event.type.replace('Event', ''),
+          branch: null,
+          repo: repo,
+          detail: null
+        };
     }
   }
 
@@ -111,32 +170,59 @@ export default function CommitHistory() {
           {events.length === 0 ? (
             <p className="text-gray-400 text-center py-10">No recent activity found</p>
           ) : (
-            events.map((event) => (
-              <div
-                key={event.id}
-                className="group relative bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-lg p-4 hover:border-emerald-400/50 transition-all duration-300"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="mt-1 text-xl">
-                    {getEventIcon(event.type)}
+            events.map((event) => {
+              const desc = getEventDescription(event);
+              const timeAgo = (() => {
+                const now = new Date();
+                const eventTime = new Date(event.created_at);
+                const diff = Math.floor((now.getTime() - eventTime.getTime()) / 1000);
+                if (diff < 60) return `${diff}s ago`;
+                if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+                if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+                if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
+                return eventTime.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+              })();
+              
+              return (
+                <a
+                  key={event.id}
+                  href={`https://github.com/${event.repo.name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative block bg-zinc-950/80 backdrop-blur-sm border border-zinc-800/50 rounded-lg p-5 hover:border-emerald-500/40 hover:bg-zinc-900/60 transition-all duration-300"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="mt-0.5 text-xl flex-shrink-0">
+                      {getEventIcon(event.type)}
+                    </div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="flex items-baseline flex-wrap gap-1.5">
+                        <span className="text-zinc-300 font-medium">{desc.main}</span>
+                        {desc.branch && (
+                          <code className="px-2 py-0.5 text-xs font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded">
+                            {desc.branch}
+                          </code>
+                        )}
+                        <span className="text-zinc-500">in</span>
+                        <span className="text-emerald-400 font-mono text-sm hover:underline">
+                          {event.repo.name}
+                        </span>
+                      </div>
+                      {desc.detail && (
+                        <p className="text-sm text-zinc-500 font-mono leading-relaxed">
+                          {desc.detail}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-3 text-xs text-zinc-600">
+                        <span className="font-mono">{timeAgo}</span>
+                        <span className="text-zinc-700">•</span>
+                        <span className="group-hover:text-emerald-500 transition-colors">{event.type.replace('Event', '')}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-gray-300 mb-1">
-                      {getEventDescription(event)}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {new Date(event.created_at).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))
+                </a>
+              );
+            })
           )}
         </div>
       </div>

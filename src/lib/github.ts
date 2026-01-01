@@ -30,14 +30,31 @@ export interface GitHubUser {
 
 const GITHUB_USERNAME = 'TrendySloth1001';
 const GITHUB_API = 'https://api.github.com';
+const GITHUB_TOKEN = process.env.NEXT_PUBLIC_GITHUB_TOKEN;
+
+function getGitHubHeaders() {
+  const headers: HeadersInit = {
+    'Accept': 'application/vnd.github.v3+json',
+  };
+  if (GITHUB_TOKEN) {
+    headers['Authorization'] = `Bearer ${GITHUB_TOKEN}`;
+  }
+  return headers;
+}
 
 export async function getGitHubUser(): Promise<GitHubUser | null> {
   try {
     const res = await fetch(`${GITHUB_API}/users/${GITHUB_USERNAME}`, {
+      headers: getGitHubHeaders(),
       next: { revalidate: 3600 }, // Cache for 1 hour
     });
     
-    if (!res.ok) return null;
+    if (!res.ok) {
+      if (res.status === 403) {
+        console.warn('GitHub API rate limit exceeded');
+      }
+      return null;
+    }
     return res.json();
   } catch (error) {
     console.error('Failed to fetch GitHub user:', error);
@@ -84,11 +101,17 @@ export async function getGitHubRepos(): Promise<GitHubRepo[]> {
     const res = await fetch(
       `${GITHUB_API}/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=100`,
       {
+        headers: getGitHubHeaders(),
         next: { revalidate: 3600 }, // Cache for 1 hour
       }
     );
     
-    if (!res.ok) return [];
+    if (!res.ok) {
+      if (res.status === 403) {
+        console.warn('GitHub API rate limit exceeded');
+      }
+      return [];
+    }
     
     const repos: GitHubRepo[] = await res.json();
     

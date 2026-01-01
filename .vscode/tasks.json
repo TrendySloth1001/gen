@@ -5,6 +5,13 @@
 			"label": "Build Next.js Project",
 			"type": "shell",
 			"command": "npm run build"
+		},
+		{
+			"label": "Start Dev Server",
+			"type": "shell",
+			"command": "npm run dev",
+			"isBackground": true,
+			"problemMatcher": []
 		}
 	]
 }

@@ -13,9 +13,9 @@ import {
   SiGit,
   SiDocker,
   SiMongodb,
-  SiPython,
-  SiFigma
+  SiPython
 } from 'react-icons/si';
+import { FaBrain } from 'react-icons/fa';
 
 export interface Skill {
   name: string;
@@ -38,7 +38,7 @@ export const skills: Skill[] = [
   { name: 'Git', icon: SiGit, color: '#F05032' },
   { name: 'Docker', icon: SiDocker, color: '#2496ED' },
   { name: 'Python', icon: SiPython, color: '#3776AB' },
-  { name: 'Figma', icon: SiFigma, color: '#F24E1E' },
+  { name: 'RAG', icon: FaBrain, color: '#10b981' },
 ];
 
 // Add or remove skills as needed - icons from react-icons/si (Simple Icons)

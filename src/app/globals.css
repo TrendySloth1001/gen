@@ -1,9 +1,36 @@
 @import "tailwindcss";
 
-:root {
-  --background: #05060a;
+/* Terminal Dark Theme (default) */
+:root,
+[data-theme="terminal-dark"] {
+  --background: #000000;
   --foreground: #e5e7eb;
   --muted: #9ca3af;
+  --accent: #10b981;
+}
+
+/* Terminal Light Theme */
+[data-theme="terminal-light"] {
+  --background: #f8fafc;
+  --foreground: #0b1220;
+  --muted: #475569;
+  --accent: #0891b2;
+}
+
+/* High Contrast Theme */
+[data-theme="high-contrast"] {
+  --background: #000000;
+  --foreground: #ffffff;
+  --muted: #cccccc;
+  --accent: #a855f7;
+}
+
+/* Colorblind Mode Theme */
+[data-theme="colorblind"] {
+  --background: #1a1a1a;
+  --foreground: #e0e0e0;
+  --muted: #888888;
+  --accent: #f97316;
 }
 
 @theme inline {
@@ -14,19 +41,19 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: #f8fafc;
-    --foreground: #0b1220;
-    --muted: #475569;
-  }
-}
-
 body {
-  background: #000000;
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* Dyslexia-friendly font */
+.dyslexia-font body {
+  font-family: 'OpenDyslexic', Arial, sans-serif;
+  letter-spacing: 0.05em;
+  line-height: 1.6;
 }
 
 /* Custom scrollbar for terminal theme */
